@@ -1,29 +1,45 @@
-"use strict";
-
+const { google } = require("googleapis");
 const path = require("path");
-const google = require("@googleapis/forms");
-const { authenticate } = require("@google-cloud/local-auth");
 
-async function runSample() {
-  // console.log(authenticate);
-  const keyFile = require(path.join(__dirname, "credentials.json"));
-  // console.log(keyFile);
-  const authClient = await authenticate({
-    keyfilePath: keyFile,
-    scopes: "https://www.googleapis.com/auth/drive",
-  });
-  const forms = google.forms({
-    version: "v1",
-    auth: authClient,
-  });
-  const newForm = {
-    info: {
-      title: "Creating a new form in Node",
-    },
-  };
-  const res = await forms.forms.create({
-    requestBody: newForm,
-  });
-  console.log(res.data);
-  return res.data;
+async function createForm(title) {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: path.join(__dirname, "secret.json"),
+      scopes: ["https://www.googleapis.com/auth/forms.body"],
+    });
+
+    const client = await auth.getClient();
+    const forms = google.forms({ version: "v1", auth: client });
+
+    const newForm = {
+      info: {
+        title: title,
+      },
+    };
+
+    const res = await forms.forms.create({
+      requestBody: newForm,
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Detailed error:", JSON.stringify(error, null, 2));
+    throw error;
+  }
 }
+
+async function getForm(formId) {
+  // Implement get form logic
+}
+
+async function updateForm(formId, title) {
+  // Implement update form logic
+}
+
+async function deleteForm(formId) {
+  // Implement delete form logic
+}
+
+async function lockForm() {}
+async function unLockForm() {}
+
+module.exports = { createForm, getForm, updateForm, deleteForm };
